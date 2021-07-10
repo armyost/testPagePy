@@ -15,19 +15,15 @@
 		def selector_val = props["selector_val"]
 		def namespace = props["namespace"]
 
-		try {
-			stage("Build Microservice image") {
-				container("docker") {
-					docker.withRegistry("${dockerRegistry}", "${credential_registry}") {
-						sh "docker build -f ./deployment/Dockerfile -t ${image}:${tag} ."
-						sh "docker push ${image}:${tag}"
-						sh "docker tag ${image}:${tag} ${image}:latest"
-						sh "docker push ${image}:latest"
-					}
+		stage("Build Microservice image") {
+			container("docker") {
+				docker.withRegistry("${dockerRegistry}", "${credential_registry}") {
+					sh "docker build -f ./deployment/Dockerfile -t ${image}:${tag} ."
+					sh "docker push ${image}:${tag}"
+					sh "docker tag ${image}:${tag} ${image}:latest"
+					sh "docker push ${image}:latest"
 				}
 			}
-
-		} catch(e) {
-			currentBuild.result = "FAILED"
 		}
+
 	}
