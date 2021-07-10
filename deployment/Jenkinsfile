@@ -12,7 +12,7 @@ podTemplate(
 	]
 ) 
 {
-	node(label) {
+	node {
 		stage("Get Source") {
 			checkout scm
         } 
