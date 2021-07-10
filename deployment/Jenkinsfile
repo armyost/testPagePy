@@ -1,8 +1,5 @@
-def label = "hellopython-${UUID.randomUUID().toString()}"
-
-
 {
-	node(label) {
+	node{
 		stage("Get Source") {
 		    git branch: 'main', url: 'https://github.com/armyost/testPagePy.git'
         } 
