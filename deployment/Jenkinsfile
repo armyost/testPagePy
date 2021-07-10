@@ -1,4 +1,3 @@
-{
 	node{
 		stage("Get Source") {
 		    git branch: 'main', url: 'https://github.com/armyost/testPagePy.git'
@@ -32,4 +31,3 @@
 			currentBuild.result = "FAILED"
 		}
 	}
-}
