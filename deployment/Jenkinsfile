@@ -1,6 +1,5 @@
 node{
 	stage('Get Source') {
-	   	git branch: 'main', url: 'https://github.com/armyost/testPagePy.git'
        		checkout scm
        	} 
 	stage('Build Microservice image') {
