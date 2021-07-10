@@ -15,7 +15,7 @@ podTemplate(
 	node {
 		stage("Get Source") {
 			checkout scm
-        } 
+       		} 
 
 		def props = readProperties  file:"deployment/pipeline.properties"
 		def tag = props["version"]
@@ -29,34 +29,30 @@ podTemplate(
 		def selector_val = props["selector_val"]
 		def namespace = props["namespace"]
 
-		try {
-			stage("Build Microservice image") {
-				container("docker") {
-					docker.withRegistry("${dockerRegistry}", "${credential_registry}") {
-						sh "docker build -f ./deployment/Dockerfile -t ${image}:${tag} ."
-						sh "docker push ${image}:${tag}"
-						sh "docker tag ${image}:${tag} ${image}:latest"
-						sh "docker push ${image}:latest"
-					}
+		stage("Build Microservice image") {
+			container("docker") {
+				docker.withRegistry("${dockerRegistry}", "${credential_registry}") {
+					sh "docker build -f ./deployment/Dockerfile -t ${image}:${tag} ."
+					sh "docker push ${image}:${tag}"
+					sh "docker tag ${image}:${tag} ${image}:latest"
+					sh "docker push ${image}:latest"
 				}
 			}
-			stage( "Clean Up Existing Deployments" ) {
-				container("kubectl") {
-					sh "kubectl delete deployments -n ${namespace} --selector=${selector_key}=${selector_val}"
-				}
-			}
-
-			stage( "Deploy to Cluster" ) {
-				container("kubectl") {
-					sh "kubectl apply -n ${namespace} -f ${deployment}"
-					sh "sleep 5"
-					sh "kubectl apply -n ${namespace} -f ${service}"
-					sh "kubectl apply -n ${namespace} -f ${ingress}"
-				}
-			}
-
-		} catch(e) {
-			currentBuild.result = "FAILED"
 		}
+		stage( "Clean Up Existing Deployments" ) {
+			container("kubectl") {
+				sh "kubectl delete deployments -n ${namespace} --selector=${selector_key}=${selector_val}"
+			}
+		}
+
+		stage( "Deploy to Cluster" ) {
+			container("kubectl") {
+				sh "kubectl apply -n ${namespace} -f ${deployment}"
+				sh "sleep 5"
+				sh "kubectl apply -n ${namespace} -f ${service}"
+				sh "kubectl apply -n ${namespace} -f ${ingress}"
+			}
+		}
+
 	}
 }
