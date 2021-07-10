@@ -4,7 +4,6 @@ node{
        	} 
 	stage("Build Microservice image") {
 		sh "docker build -f ./deployment/Dockerfile -t armyost/hellopython:$BUILD_NUMBER ."
-		}
 	}
 }
 
