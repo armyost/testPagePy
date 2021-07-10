@@ -12,7 +12,7 @@ podTemplate(
 	]
 ) 
 {
-	node(label) {
+	node('hellopython') {
 		stage("Get Source") {
 			checkout scm
        		} 
