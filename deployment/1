@@ -1,5 +1,4 @@
-def label = "hellopython"
-
+def 
 
 podTemplate(
 	label: label, 
@@ -12,7 +11,7 @@ podTemplate(
 	]
 ) 
 {
-	node(label) {
+	node('hellopython') {
 		stage("Get Source") {
 			checkout scm
        		} 
