@@ -3,11 +3,7 @@ node{
 	   	git branch: 'main', url: 'https://github.com/armyost/testPagePy.git'
        	} 
 	stage("Build Microservice image") {
-		docker.withRegistry("${dockerRegistry}", "${credential_registry}") {
-			sh "docker build -f ./deployment/Dockerfile -t ${image}:${tag} ."
-			sh "docker push ${image}:${tag}"
-			sh "docker tag ${image}:${tag} ${image}:latest"
-			sh "docker push ${image}:latest"
+		sh "docker build -f ./deployment/Dockerfile -t armyost/hellopython:$BUILD_NUMBER ."
 		}
 	}
 }
