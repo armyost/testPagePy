@@ -1,6 +1,7 @@
 node{
 	stage('Get Source') {
 	   	git branch: 'main', url: 'https://github.com/armyost/testPagePy.git'
+       		checkout scm
        	} 
 	stage('Build Microservice image') {
 		sh "docker build -f ./deployment/Dockerfile -t armyost/hellopython:$BUILD_NUMBER ."
