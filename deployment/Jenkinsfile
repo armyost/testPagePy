@@ -1,5 +1,3 @@
-def label = "hellopython-${UUID.randomUUID().toString()}"
-
 
 podTemplate(
 	label: label, 
@@ -12,7 +10,7 @@ podTemplate(
 	]
 ) 
 {
-	node {
+	node('hellopython') {
 		stage("Get Source") {
 			checkout scm
        		} 
