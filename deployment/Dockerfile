@@ -8,7 +8,7 @@ WORKDIR /app/server
 
 EXPOSE 80
 
-RUN pip3 install flask --proxy="proxy.google.io:3128"
+RUN pip3 install -r ./deployment/requirements.txt 
 
 ENTRYPOINT ["python", "run.py"]
 
