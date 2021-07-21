@@ -4,6 +4,7 @@ metadata:
   name: hellopython
   labels:
     app: hellopython
+  namespace: ns-jenkins
 spec:
   selector:
     matchLabels:
