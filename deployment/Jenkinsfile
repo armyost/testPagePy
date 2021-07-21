@@ -14,7 +14,7 @@ podTemplate(
 {
 	node(label) {
 		stage("Get Source") {
-		    git branch: 'main', url: 'https://github.com/armyost/testPagePy.git'
+			checkout scm
         } 
 
 		def props = readProperties  file:"deployment/pipeline.properties"
