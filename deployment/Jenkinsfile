@@ -34,7 +34,7 @@ podTemplate(
 				container("docker") {
 					docker.withRegistry("${dockerRegistry}", "${credential_registry}") {
 						sh "docker build -f ./deployment/Dockerfile -t ${image}:${tag} ."
-						sh "docker login -u 'armyost' -p 'fkadlg12' docker.io"
+						sh "docker login -u 'armyost' -p '*********' docker.io"
 						sh "docker push ${image}:${tag}"
 						sh "docker tag ${image}:${tag} ${image}:latest"
 						sh "docker push ${image}:latest"
