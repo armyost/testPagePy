@@ -8,9 +8,7 @@ WORKDIR /app/server
 
 EXPOSE 80
 
-RUN apt-get update
-
-RUN apt-get install -y python-flask
+RUN pip3 install -r ./deployment/requirements.txt
 
 ENTRYPOINT ["python", "run.py"]
 
