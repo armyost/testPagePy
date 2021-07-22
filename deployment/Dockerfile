@@ -10,7 +10,7 @@ EXPOSE 80
 
 RUN apt-get update
 
-RUN apt-get install -y python3-flask
+RUN apt-get install -y python-flask
 
 ENTRYPOINT ["python", "run.py"]
 
