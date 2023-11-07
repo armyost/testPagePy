@@ -40,4 +40,5 @@ jobs:
 
     - name: Run Application
       run: |
-        python .\run.py
+        ls ./*
+        python ./run.py
