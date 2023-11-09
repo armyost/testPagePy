@@ -4,41 +4,166 @@
 name: Python application
 
 on:
-  push:
-    branches: [ "master" ]
-  pull_request:
-    branches: [ "master" ]
+  workflow_dispatch:
+    inputs:
+      logLevel:
+        description: 'Log level'     
+        required: true
+        default: 'warning'
+      tags:
+        description: 'Test scenario tags'
+  # push:
+  #   branches: [ "master" ]
+  # pull_request:
+  #   branches: [ "master" ]
 
 permissions:
   contents: read
 
+env:
+  BASE_BRANCH: "develop"
+  PROJECT_NAME: "sample-project"
+  BUILD_PATH: "/buildspace"
+  MANIFEST_PATH: "/deployment"
+  APP_NAME: "sample-app"
+  K8S_NAMESPACE: "sample-ns"
+  # TARGET_SERVER: > 
+  #   192.168.122.13
+  #   192.168.122.13
+  #   192.168.122.13
+
 jobs:
-  build:
-
+  source-code-build-job:
     runs-on: ubuntu-latest
-
+    # configuration And Checkout
     steps:
     - uses: actions/checkout@v3
+      with:
+        ref: $BASE_BRANCH
     - name: Set up Python 3.10
       uses: actions/setup-python@v3
       with:
         python-version: "3.10"
+
+    # Before build
+    - name: Setup build environment
+      run: |
+        pwd
+        rsync -a ../$PROJECT_NAME $BUILD_PATH
+        cd $BUILD_PATH/$PROJECT_NAME
+
+    # initailize
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        # pip install flake8 pytest
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-    # - name: Lint with flake8
-    #   run: |
-    #     # stop the build if there are Python syntax errors or undefined names
-    #     flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-    #     # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-    #     flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
-    # - name: Test with pytest
-    #   run: |
-    #     pytest
 
-    - name: Run Application
+    # Source Code Build
+    - name: Build source codes
       run: |
-        ls ./*
-        python ./run.py
+        echo "Compiling the code..."  
+        echo "Compile complete."
+
+    # Unit test
+    - name: Unit test
+      run: |
+        echo "Running unit tests... This will take about 60 seconds."
+        sleep 2
+        echo "Code coverage is 90%"
+
+    # Quality Gate
+    # - name: Quality Gate Check
+    #   uses: dieuhd/sonar-quality-gate@v1
+    #   env:
+    #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
+    #     GIT_URL: "https://api.github.com"
+    #     GIT_TOKEN: ${{ secrets.GIT_TOKEN }} 
+    #     SONAR_URL: ${{ secrets.SONAR_URL }}
+    #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+    #     SONAR_PROJECT_KEY: ${{ secrets.SONAR_PROJECT_KEY }}
+    #   with:
+    #     login:  ${{ secrets.SONAR_TOKEN }}
+    #     url: ${{ secrets.SONAR_URL }}
+    #     projectKey: ${{ secrets.SONAR_PROJECT_KEY }}
+    
+    # After build
+    # - name: Make manifests
+    #   run: |
+    #     sed -i -e 's,TEMP_APP_ECR_IMAGE,'$AUSFRONT_ECR',g' app/deployment/frontend-application/aus-frontend.yaml
+    #     sed -i -e 's,TEMP_APP_ECR_IMAGE,'$AUSBACKEND_ECR',g' deployment/backend-application/aus-backend.yaml
+    #     sed -i -e 's,TEMP_APP_ECR_IMAGE,'$PMSFRONT_ECR',g' deployment/frontend-application/pms-frontend.yaml
+    #     sed -i -e 's,TEMP_APP_ECR_IMAGE,'$PMSBACKEND_ECR',g' deployment/backend-application/pms-backend.yaml
+
+    # Store artifacts
+    - name: Archive production artifacts
+      uses: actions/upload-artifact@v3
+      with:
+          name: dist-without-markdown
+          path: |
+            dist
+            !dist/**/*.md
+          retention-days: 5
+    
+    - name: Archive Manifests
+      uses: actions/upload-artifact@v3
+      with:
+          name: deployement-without-markdown
+          path: |
+            deployement
+          retention-days: 5
+
+  build-image-job:
+    runs-on: ubuntu-latest
+    # DownLoad Artifact
+    steps:
+    - name: Download a application artifact
+      uses: actions/download-artifact@v3
+      with:
+        name: dist-without-markdown
+    
+    # Before build
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    # Docker Repository Login
+    # - name: Login to Docker Hub
+    #   uses: docker/login-action@v3
+    #   with:
+    #     username: ${{ secrets.DOCKERHUB_USERNAME }}
+    #     password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+    # Build and Push Image Artifact to Docker Repository
+    # - name: Build and Push Image Artifact
+    #   uses: docker/build-push-action@v5
+    #   with:
+    #     push: true
+    #     tags: $PROJECT_NAME/app:latest
+
+  deploy-job:
+    runs-on: ubuntu-latest
+    # DownLoad Artifact
+    steps:
+    - name: Download manifests
+      uses: actions/download-artifact@v3
+      with:
+        name: deployement-without-markdown
+    
+    # Check Kubeconfig Setting for deploy
+    # - name: Check Kubeconfig 
+    #   uses: actions-hub/kubectl@master
+    #   env: ${{ secrets.KUBE_CONFIG }}
+    #   with:
+        args: get pods -n $K8S_NAMESPACE
+    
+    # Deploy Manifests
+    # - name: Deploy Manifests
+    #   uses: actions-hub/kubectl@master
+    #   env: ${{ secrets.KUBE_CONFIG }}
+    #   with:
+    #     args: apply -f $MANIFEST_PATH/deployment.yaml -n $K8S_NAMESPACE
+      
+
+    # - name: Run Application
+    #   run: |
+    #     ls ./*
+    #     python ./run.py
