@@ -85,7 +85,7 @@ jobs:
     #     login:  ${{ secrets.SONAR_TOKEN }}
     #     url: ${{ secrets.SONAR_URL }}
     #     projectKey: ${{ secrets.SONAR_PROJECT_KEY }}
-    
+
     # After build
     # - name: Make manifests
     #   run: |
@@ -113,6 +113,7 @@ jobs:
           retention-days: 5
 
   build-image-job:
+    needs: source-code-build-job
     runs-on: ubuntu-latest
     # DownLoad Artifact
     steps:
@@ -140,6 +141,7 @@ jobs:
     #     tags: $PROJECT_NAME/app:latest
 
   deploy-job:
+    needs: build-image-job
     runs-on: ubuntu-latest
     # DownLoad Artifact
     steps:
