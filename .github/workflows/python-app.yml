@@ -24,10 +24,13 @@ permissions:
 env:
   BASE_BRANCH: "master"
   PROJECT_NAME: "testPagePy"
+  PROJECT_ID: "00000"
   BUILD_PATH: "/buildspace"
   MANIFEST_PATH: "/deployment"
   APP_NAME: "sample-app"
   K8S_NAMESPACE: "sample-ns"
+  GAR_LOCATION: "europe-west1-docker.pkg.dev/sample-prj-407212/sample-img-registry"
+  REGION: "europe-west1"
 
 jobs:
   source-code-build-job:
@@ -100,6 +103,8 @@ jobs:
           path: |
             dist
             !dist/**/*.md
+            pwd
+            ls -a
           retention-days: 5
     
     - name: Archive Manifests
@@ -130,13 +135,7 @@ jobs:
         workload_identity_provider: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER_ID }}
         service_account: ${{ secrets.SERVICE_ACCOUNT }}
 
-    # Docker Repository Login
-    - name: Login to Image Registry
-      run: |
-        echo "Login to Image Registry..."
-        docker login europe-west1-docker.pkg.dev/sample-prj-407212/sample-img-registry
-
-    # Option 2) Docker Repository Login
+    # Option 2) Docker Repository Direct Login
     # - name: Login to Docker Hub
     #   uses: docker/login-action@v3
     #   with:
@@ -144,11 +143,12 @@ jobs:
     #     password: ${{ secrets.DOCKERHUB_TOKEN }}
 
     # Build and Push Image Artifact to Docker Repository
-    # - name: Build and Push Image Artifact
-    #   uses: docker/build-push-action@v5
-    #   with:
-    #     push: true
-    #     tags: $PROJECT_NAME/app:latest
+    - name: Build image
+      run: docker build . --file DOCKERFILE_LOCATION --tag ${{ env.GAR_LOCATION }}
+      working-directory: WORKING_DIRECTORY
+
+    - name: Push image
+      run: docker push ${{ env.GAR_LOCATION }}
 
   deploy-job:
     needs: build-image-job
