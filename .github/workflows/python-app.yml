@@ -49,8 +49,9 @@ jobs:
     - name: Setup build environment
       run: |
         pwd
-        rsync -a ../$PROJECT_NAME $BUILD_PATH
-        cd $BUILD_PATH/$PROJECT_NAME
+        mkdir ../$BUILD_PATH
+        rsync -a ../$PROJECT_NAME ..$BUILD_PATH/
+        cd ..$BUILD_PATH/$PROJECT_NAME
 
     # initailize
     - name: Install dependencies
