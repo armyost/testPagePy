@@ -156,7 +156,6 @@ jobs:
     # Build and Push Image Artifact to Docker Repository
     - name: Build image
       run: docker build . --file DockerFile --tag ${{ env.GAR_LOCATION }}
-      working-directory: WORKING_DIRECTORY
 
     - name: Push image
       run: docker push ${{ env.GAR_LOCATION }}
