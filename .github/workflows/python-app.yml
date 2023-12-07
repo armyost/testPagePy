@@ -49,7 +49,7 @@ jobs:
     - name: Setup build environment
       run: |
         pwd
-        cd ./$PROJECT_NAME
+        cd ./app
 
     # initailize
     - name: Install dependencies
