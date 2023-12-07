@@ -120,6 +120,7 @@ jobs:
           name: deployement-without-markdown
           path: |
             deployement
+            !deployement/**/*.md
           retention-days: 5
 
   build-image-job:
@@ -174,7 +175,12 @@ jobs:
       uses: actions/download-artifact@v3
       with:
         name: deployement-without-markdown
-    
+
+    - name: Show files downloaded
+      run: |
+        pwd
+        ls -a
+  
     # Check Kubeconfig Setting for deploy
     # - name: Check Kubeconfig 
     #   uses: actions-hub/kubectl@master
