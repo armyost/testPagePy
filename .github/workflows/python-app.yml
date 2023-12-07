@@ -22,7 +22,7 @@ permissions:
 
 env:
   BASE_BRANCH: "master"
-  PROJECT_NAME: "sample-project"
+  PROJECT_NAME: "testPagePy"
   BUILD_PATH: "/buildspace"
   MANIFEST_PATH: "/deployment"
   APP_NAME: "sample-app"
