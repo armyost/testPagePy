@@ -47,13 +47,14 @@ jobs:
 
     # Before build
     - name: Setup build environment
-      run: pwd
+      run: |
+        echo "Setup environments for build." 
+        echo "Complete setting for build environment."
 
     # initailize
     - name: Install dependencies
       run: |
         cd ./app
-        pwd
         python -m pip install --upgrade pip
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
@@ -66,9 +67,8 @@ jobs:
     # Unit test
     - name: Unit test
       run: |
-        echo "Running unit tests... This will take about 60 seconds."
-        sleep 2
-        echo "Code coverage is 90%"
+        echo "Running unit tests... This will take about 60 seconds." 
+        echo "Unit tests complete."
 
     # Quality Gate
     # - name: Quality Gate Check
@@ -88,17 +88,16 @@ jobs:
     # After build
     - name: Move Application Artifact for distribute
       run: |
-        pwd
-        rsync -a ./app ./$BUILD_PATH/
+        rsync -a ./app ./${{ env.BUILD_PATH }}/
     
     - name: Move DockerFile for distribute
       run: |
-        pwd
-        rsync -a Dockerfile ./$BUILD_PATH/
+        rsync -a Dockerfile ./${{ env.BUILD_PATH }}/
 
     - name: Make manifests
       run: |
         pwd    
+        ls -a
     #     sed -i -e 's,TEMP_APP_ECR_IMAGE,'$AUSFRONT_ECR',g' app/deployment/frontend-application/aus-frontend.yaml
     #     sed -i -e 's,TEMP_APP_ECR_IMAGE,'$AUSBACKEND_ECR',g' deployment/backend-application/aus-backend.yaml
     #     sed -i -e 's,TEMP_APP_ECR_IMAGE,'$PMSFRONT_ECR',g' deployment/frontend-application/pms-frontend.yaml
@@ -117,15 +116,16 @@ jobs:
     - name: Archive Manifests
       uses: actions/upload-artifact@v3
       with:
-          name: deployement-without-markdown
+          name: manifest-without-markdown
           path: |
-            deployement
-            !deployement/**/*.md
+            manifest
+            !manifest/**/*.md
           retention-days: 5
 
   build-image-job:
     needs: source-code-build-job
     runs-on: ubuntu-latest
+
     # DownLoad Artifact
     steps:
     - name: Download a application artifact
@@ -135,7 +135,6 @@ jobs:
 
     - name: Show files downloaded
       run: |
-        pwd
         ls -a
     
     # Option 1) GCP Login
@@ -157,13 +156,13 @@ jobs:
 
     # Build and Push Image Artifact to Docker Repository
     - name: Build image
-      run: docker build -f ./Dockerfile . --tag ${{ env.GAR_LOCATION }}/$APP_NAME:latest
+      run: docker build -f ./Dockerfile . --tag ${{ env.GAR_LOCATION }}/${{ env.APP_NAME }}:latest
       working-directory: .
 
     - name: Push image
       run: |
         gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
-        docker push ${{ env.GAR_LOCATION }}/$APP_NAME:latest
+        docker push ${{ env.GAR_LOCATION }}/${{ env.APP_NAME }}:latest
 
   deploy-job:
     needs: build-image-job
@@ -174,11 +173,10 @@ jobs:
     - name: Download manifests
       uses: actions/download-artifact@v3
       with:
-        name: deployement-without-markdown
+        name: manifest-without-markdown
 
     - name: Show files downloaded
       run: |
-        pwd
         ls -a
   
     # Check Kubeconfig Setting for deploy
