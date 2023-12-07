@@ -48,12 +48,13 @@ jobs:
     # Before build
     - name: Setup build environment
       run: |
-        pwd
         cd ./app
+        pwd
 
     # initailize
     - name: Install dependencies
       run: |
+        pwd
         python -m pip install --upgrade pip
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
@@ -157,7 +158,7 @@ jobs:
     # Build and Push Image Artifact to Docker Repository
     - name: Build image
       run: docker build -f DockerFile . --tag ${{ env.GAR_LOCATION }}
-      working-directory: WORKING_DIRECTORY
+      working-directory: .
 
     - name: Push image
       run: docker push ${{ env.GAR_LOCATION }}
