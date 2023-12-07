@@ -123,15 +123,20 @@ jobs:
         name: dist-without-markdown
     
     # Before build
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
+    - name: Set up GCP Credential
+      uses: 'google-github-actions/auth@v1'
+      with:
+        workload_identity_provider: projects/442221788601/locations/global/workloadIdentityPools/k8s-pool/providers/my-provider
+        service_account: github-actions-sa@sample-prj-407212.iam.gserviceaccount.com	
+
+    # - name: Set up Docker Buildx
+    #   uses: docker/setup-buildx-action@v3
 
     # Docker Repository Login
-    # - name: Login to Docker Hub
-    #   uses: docker/login-action@v3
-    #   with:
-    #     username: ${{ secrets.DOCKERHUB_USERNAME }}
-    #     password: ${{ secrets.DOCKERHUB_TOKEN }}
+    - name: Login to Image Registry
+      uses: docker/login-action@v3
+      with:
+        registry: europe-west1-docker.pkg.dev/sample-prj-407212/sample-img-registry
 
     # Build and Push Image Artifact to Docker Repository
     # - name: Build and Push Image Artifact
