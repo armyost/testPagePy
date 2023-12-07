@@ -103,10 +103,13 @@ jobs:
           path: |
             dist
             !dist/**/*.md
-            pwd
-            ls -a
           retention-days: 5
     
+    - name: Show files downloaded
+      run: |
+        pwd
+        ls -a
+
     - name: Archive Manifests
       uses: actions/upload-artifact@v3
       with:
