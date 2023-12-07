@@ -160,7 +160,9 @@ jobs:
       working-directory: .
 
     - name: Push image
-      run: docker push ${{ env.GAR_LOCATION }}
+      run: |
+        gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
+        docker push ${{ env.GAR_LOCATION }}
 
   deploy-job:
     needs: build-image-job
