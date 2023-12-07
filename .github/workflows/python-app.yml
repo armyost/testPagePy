@@ -89,6 +89,11 @@ jobs:
       run: |
         pwd
         rsync -a ./app ./$BUILD_PATH/
+    
+    - name: Move DockerFile for distribute
+      run: |
+        pwd
+        rsync -a Dockerfile ./$BUILD_PATH/
 
     - name: Make manifests
       run: |
