@@ -2,13 +2,10 @@ FROM python:3.8
 
 LABEL maintainer="armyost@naver.com"
 
-COPY . /app/server
+WORKDIR /app
+COPY ./app /app
 
-WORKDIR /app/server
+RUN pip install --trusted-host pypi.python.org -r requirements.txt
 
-EXPOSE 80
-
-RUN pip3 install -r ./deployment/requirements.txt
-
-ENTRYPOINT ["python", "run.py"]
+ENTRYPOINT ["python", "app.py"]
 

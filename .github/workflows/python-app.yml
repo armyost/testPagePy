@@ -155,7 +155,7 @@ jobs:
 
     # Build and Push Image Artifact to Docker Repository
     - name: Build image
-      run: docker build . --file DockerFile --tag ${{ env.GAR_LOCATION }}
+      run: docker build -f DockerFile . --tag ${{ env.GAR_LOCATION }}
 
     - name: Push image
       run: docker push ${{ env.GAR_LOCATION }}
@@ -163,6 +163,7 @@ jobs:
   deploy-job:
     needs: build-image-job
     runs-on: ubuntu-latest
+
     # DownLoad Artifact
     steps:
     - name: Download manifests
