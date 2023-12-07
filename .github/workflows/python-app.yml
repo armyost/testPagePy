@@ -25,8 +25,8 @@ env:
   BASE_BRANCH: "master"
   PROJECT_NAME: "testPagePy"
   PROJECT_ID: "00000"
-  BUILD_PATH: "/dist"
-  MANIFEST_PATH: "/deployment"
+  BUILD_PATH: "dist"
+  MANIFEST_PATH: "deployment"
   APP_NAME: "sample-app"
   K8S_NAMESPACE: "sample-ns"
   GAR_LOCATION: "europe-west1-docker.pkg.dev/sample-prj-407212/sample-img-registry"
@@ -49,8 +49,6 @@ jobs:
     - name: Setup build environment
       run: |
         pwd
-        rsync -a ../$PROJECT_NAME $BUILD_PATH/
-        cd ..$BUILD_PATH/$PROJECT_NAME
 
     # initailize
     - name: Install dependencies
@@ -86,13 +84,15 @@ jobs:
     #     url: ${{ secrets.SONAR_URL }}
     #     projectKey: ${{ secrets.SONAR_PROJECT_KEY }}
 
-    #After build
-    - name: Make manifests
+    # After build
+    - name: Move Application Artifact for distribute
       run: |
         pwd
-        cd ./deployment
-        rsync -a ../deployment $BUILD_PATH/
-    
+        rsync -a ./app ./$BUILD_PATH/
+
+    - name: Make manifests
+      run: |
+        pwd    
     #     sed -i -e 's,TEMP_APP_ECR_IMAGE,'$AUSFRONT_ECR',g' app/deployment/frontend-application/aus-frontend.yaml
     #     sed -i -e 's,TEMP_APP_ECR_IMAGE,'$AUSBACKEND_ECR',g' deployment/backend-application/aus-backend.yaml
     #     sed -i -e 's,TEMP_APP_ECR_IMAGE,'$PMSFRONT_ECR',g' deployment/frontend-application/pms-frontend.yaml
