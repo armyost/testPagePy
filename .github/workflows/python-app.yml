@@ -105,11 +105,6 @@ jobs:
             !dist/**/*.md
           retention-days: 5
     
-    - name: Show files downloaded
-      run: |
-        pwd
-        ls -a
-
     - name: Archive Manifests
       uses: actions/upload-artifact@v3
       with:
@@ -127,6 +122,11 @@ jobs:
       uses: actions/download-artifact@v3
       with:
         name: dist-without-markdown
+
+    - name: Show files downloaded
+      run: |
+        pwd
+        ls -a
     
     # Option 1) GCP Login
     - name: Set up GCP Credential
