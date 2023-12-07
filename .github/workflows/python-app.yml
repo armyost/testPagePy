@@ -24,9 +24,7 @@ permissions:
 env:
   BASE_BRANCH: "master"
   PROJECT_NAME: "testPagePy"
-  PROJECT_ID: "00000"
   BUILD_PATH: "dist"
-  MANIFEST_PATH: "deployment"
   APP_NAME: "sample-app"
   K8S_NAMESPACE: "sample-ns"
   GAR_LOCATION: "europe-west1-docker.pkg.dev/sample-prj-407212/sample-img-registry"
