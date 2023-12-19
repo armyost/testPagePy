@@ -1,35 +1,55 @@
 apiVersion: apps/v1
 kind: Deployment
-metadata:
-  name: hellopython
-  labels:
-    app: hellopython
-  namespace: ns-jenkins
+metadata:                           # Deployment object 자신의 고유 정보
+  name: APP_NAME-deploy             # Deployment object에 대한 Unique-key
 spec:
-  selector:
+  replicas: 2                       # 초기 Pod의 개수를 설정
+  minReadySeconds: 10               # Pod이 Ready 단계가 된 후, Available 단계가 될 때 까지의 시간 차이
+  revisionHistoryLimit: 2           # replicaset 이전버전 보관수
+  strategy:
+    type: RollingUpdate             # RollingUpdate에 대한 상세 설정. “Recreate” or “RollingUpdate”를 설정 가능 합니다. 기본값은 “RollingUpdate” 입니다. Recreate의 경우 Pod가 삭제된 후 재생성.
+    rollingUpdate:
+      maxUnavailable: 25%
+  selector:                         # Deployment object가 관리해야할 Pod이 어떤 것인지 찾기 위해 selector 정보로 Pod의 label 정보를 비교하고 관리
     matchLabels:
-      app: hellopython
-  replicas: 2
-  template:
+      app: APP_NAME
+  template:                         # Deployment object가 생성할 Pod 관련 설정
     metadata:
-      name: hellopython
       labels:
-        app: hellopython
+        app: APP_NAME
     spec:
+      imagePullSecrets:
+        - name: container-registry-auth
+      hostAliases:
       containers:
-        - name: hellopython
-          image: armyost/hellopython
-          imagePullPolicy: Always
-          env:
-            - name: PORT
-              value: "80"
+        - name: APP_NAME
+          image: IMG_REGI/APP_NAME:latest
+          imagePullPolicy: Always     # Always download images, **IfNotPresent : Use cached images first
           ports:
-            - name: port1
-              containerPort: 80
+            - name: http
+              containerPort: 8080       # ==============>   targetPort와 맞춰주세요  <=====================
           resources:
-            requests:
-              cpu: 500m
-              memory: 1024Mi
-            limits:
-              cpu: 1000m
-              memory: 2048Mi
+            requests:                 # 컨테이너가 요청할 최소한의 리소스에 대한 설정입니다. 
+              memory: "128Mi"
+              cpu: "250m"
+            limits:                   # 컨테이너가 최대한으로 사용할 리소스에 대한 설정입니다. 애플리케이션에 따라 적절한 CPU와 메모리 값으로 설정
+              memory: "512Mi"
+              cpu: "500m"
+          livenessProbe:
+            httpGet:
+              path: /service/healthy
+              port: 8080
+            initialDelaySeconds: 60
+            failureThreshold: 10
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /service/healthy
+              port: 8080
+            initialDelaySeconds: 60 # 컨테이너가 시작된 후 프로브를 보내기 전에 기다리는 시간
+            failureThreshold: 5
+            periodSeconds: 15       # 검사를 보내는 빈도. 보통 10~20초 사이로 세팅
+          lifecycle:                # 20 초의 동기식 유예 기간을 선택. 포드 종료 프로세스는이 대기 시간 후에 만 ​계속됨
+            preStop:
+              exec:
+                command: ["sh", "-c", "sleep 20"]

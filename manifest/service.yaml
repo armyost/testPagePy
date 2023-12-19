@@ -1,13 +1,13 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: hellopython
-  namespace: ns-jenkins
-spec:
-  type: NodePort
-  selector:
-    app: hellopython
+  name: APP_NAME-svc
+spec:                               # Service object를 노출하기 위한 방식을 설정
+  type: ClusterIP
+  selector:                         # Service object가 요청을 전달할 Pod을 찾기위한 검색어
+    app: APP_NAME                # app이름으로  Pod의 label이 같은 pod를 찾아 요청을 전달, 찾은 Pod이 여러개인 경우 load balancing 정책에 따라 하나의 Pod을 선택함.
   ports:
-    - name: hellopython
-      port: 8090
-      targetPort: 80
+    - name: http
+      protocol: TCP
+      port: 80                        # 외부에서 접속 port ====> application 접속포트 확인하세요
+      targetPort: 8080                # Service object로 들어온 요청을 전달할 target이되는 Pod이 노출하고 있는 포트.(pod 내의 container 연결포트)

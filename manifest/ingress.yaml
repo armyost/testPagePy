@@ -1,19 +1,18 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: hellopython
+  name: APP_NAME-ing
   annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /$1
-    nginx.ingress.kubernetes.io/ssl-redirect: "false"
-  namespace: ns-jenkins
+    kubernetes.io/ingress.class: "gce"
 spec:
   rules:
-    - http:
+    - host: APP_NAME.armyost.com
+      http:
         paths:
-          - path: /(.*)
-            pathType: Prefix
-            backend:
-              service:
-                name: hellopython
-                port: 
-                  number: 8090
+        - path: /*
+          pathType: Prefix
+          backend:
+            service:
+              name: APP_NAME-svc
+              port:
+                number: 80
