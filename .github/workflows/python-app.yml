@@ -142,13 +142,13 @@ jobs:
 
     # Build and push image artifact to Docker repository
     - name: Build image
-      run: docker build -f ./Dockerfile . --tag ${{ env.GAR_LOCATION }}/${{ env.APP_NAME }}:latest
+      run: docker build -f ./Dockerfile . --tag ${{ env.GAR_URL }}/${{ env.APP_NAME }}:latest
       working-directory: .
 
     - name: Push image
       run: |
         gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
-        docker push ${{ env.GAR_LOCATION }}/${{ env.APP_NAME }}:latest
+        docker push ${{ env.GAR_URL }}/${{ env.APP_NAME }}:latest
 
   deploy-job: # Deploy resources job
     needs: build-image-job
