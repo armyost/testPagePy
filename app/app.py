@@ -7,7 +7,7 @@ def home():
 
 @app.route('/service/healthy')
 def healthCheck():
-   return '200'
+   return '', 200
 
 if __name__ == '__main__':  
-   app.run('0.0.0.0',port=5000,debug=True)
+   app.run('0.0.0.0',port=8080,debug=True)
