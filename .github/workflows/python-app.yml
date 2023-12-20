@@ -188,3 +188,4 @@ jobs:
         kubectl apply -f deployment.yaml -n ${{ env.K8S_NAMESPACE }}
         kubectl apply -f ingress.yaml -n ${{ env.K8S_NAMESPACE }}
         kubectl apply -f service.yaml -n ${{ env.K8S_NAMESPACE }}
+        kubectl status deployment ${{ env.APP_NAME }}-deploy -n ${{ env.K8S_NAMESPACE }}
