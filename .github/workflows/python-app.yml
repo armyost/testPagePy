@@ -185,4 +185,4 @@ jobs:
     # Deploy manifests
     - name: Deploy Manifests
       run: |
-        kubectl apply -f deployment.yaml -n ${{ env.K8S_NAMESPACE }}
+        kubectl apply -f . -n ${{ env.K8S_NAMESPACE }}
