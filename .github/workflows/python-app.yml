@@ -30,6 +30,8 @@ env:
   REGION: "europe-west1"      # GCP location
   PYTHON_VERSION: "3.10"      # source code development kit version
   MANIFEST_PATH: "manifest"   # manifests directory path
+  GKE_CLUSTER: "gke_sample-prj-231220_europe-west1_sample-cluster"
+  GKE_ZONE: "europe-west1"
 
 jobs:
   source-code-build-job: # Build artifacts job
@@ -175,12 +177,11 @@ jobs:
   
     # Check kubeconfig setting for deploy
     - name: Check Kubeconfig 
-      uses: actions-hub/kubectl@master
-      env: 
-        KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
+      uses: google-github-actions/get-gke-credentials@db150f2cc60d1716e61922b832eae71d2a45938f
       with:
-        args: get pods -n ${{ env.K8S_NAMESPACE }}
-    
+        cluster_name: ${{ env.GKE_CLUSTER }}
+        location: ${{ env.GKE_ZONE }}
+            
     # Deploy manifests
     - name: Deploy Manifests
       uses: actions-hub/kubectl@master
