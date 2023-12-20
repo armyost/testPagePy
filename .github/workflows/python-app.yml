@@ -186,4 +186,5 @@ jobs:
     - name: Deploy Manifests
       uses: actions-hub/kubectl@master
       with:
-        args: apply -f ./$MANIFEST_PATH -n ${{ env.K8S_NAMESPACE }}
+        # args: apply -f ./$MANIFEST_PATH -n ${{ env.K8S_NAMESPACE }}
+        args: apply -f deployment.yaml -n ${{ env.K8S_NAMESPACE }}
