@@ -30,7 +30,7 @@ env:
   REGION: "europe-west1"      # GCP location
   PYTHON_VERSION: "3.10"      # source code development kit version
   MANIFEST_PATH: "manifest"   # manifests directory path
-  GKE_CLUSTER: "google-github-actions/get-gke-credentials"
+  GKE_CLUSTER: "sample-cluster"
   GKE_ZONE: "europe-west1"
 
 jobs:
