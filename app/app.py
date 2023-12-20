@@ -6,7 +6,7 @@ def home():
    return 'This is Home!'
 
 @app.route('/service/healthy')
-def home():
+def healthCheck():
    return '200'
 
 if __name__ == '__main__':  
