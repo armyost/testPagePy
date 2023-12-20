@@ -132,7 +132,7 @@ jobs:
       run: |
         ls -a
     
-    # Option 1) GCP login
+    # GCP login
     - name: Set up GCP Credential
       uses: 'google-github-actions/auth@v1'
       with:
@@ -164,6 +164,14 @@ jobs:
     - name: Show files downloaded
       run: |
         ls -a
+
+    # GCP login
+    - name: Set up GCP Credential
+      uses: 'google-github-actions/auth@v1'
+      with:
+        token_format: 'access_token'
+        workload_identity_provider: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER_ID }}
+        service_account: ${{ secrets.SERVICE_ACCOUNT }}  
   
     # Check kubeconfig setting for deploy
     - name: Check Kubeconfig 
