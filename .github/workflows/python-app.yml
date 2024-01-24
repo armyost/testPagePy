@@ -150,13 +150,13 @@ jobs:
     - name: Build image
       run: | 
         # docker build -f ./Dockerfile . --tag ${{ env.GAR_URL }}/${{ env.APP_NAME }}:latest
-        docker build -f ./Dockerfile . --tag armyost/${{ env.APP_NAME }}:v0.1
+        docker build -f ./Dockerfile . --tag armyost/${{ env.APP_NAME }}:v0.2
       working-directory: .
 
     - name: Push image
       run: |
         docker login --username=${{ secrets.DOCKERHUB_USERNAME }} --password=${{ secrets.DOCKERHUB_TOKEN }}
-        docker push armyost/${{ env.APP_NAME }}:v0.1
+        docker push armyost/${{ env.APP_NAME }}:v0.2
       #   gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
       #   docker push ${{ env.GAR_URL }}/${{ env.APP_NAME }}:latest
 
