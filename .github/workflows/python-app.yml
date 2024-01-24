@@ -28,8 +28,7 @@ env:
   BUILD_PATH: "dist"          # directory for distributing artifacts
   GAR_URL: "europe-west1-docker.pkg.dev/sample-prj-231220/sample-img-registry" # Image registry path
   REGION: "europe-west1"      # GCP location
-  PYTHON_VERSION: "3.10.13"      # source code development kit version
-  # PYTHON_VERSION: "3.10"      # source code development kit version
+  PYTHON_VERSION: "3.10"      # source code development kit version
   MANIFEST_PATH: "manifest"   # manifests directory path
   GKE_CLUSTER: "sample-cluster"
   GKE_ZONE: "europe-west1"
