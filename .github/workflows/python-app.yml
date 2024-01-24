@@ -119,6 +119,7 @@ jobs:
             manifest
             !manifest/**/*.md
           retention-days: 5
+          
 
   build-image-job: # Build container image job
     needs: source-code-build-job
@@ -137,22 +138,41 @@ jobs:
         ls -a
     
     # GCP login
-    - name: Set up GCP Credential
-      uses: 'google-github-actions/auth@v1'
-      with:
-        token_format: 'access_token'
-        workload_identity_provider: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER_ID }}
-        service_account: ${{ secrets.SERVICE_ACCOUNT }}
+    # - name: Set up GCP Credential
+    #   uses: 'google-github-actions/auth@v1'
+    #   with:
+    #     token_format: 'access_token'
+    #     workload_identity_provider: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER_ID }}
+    #     service_account: ${{ secrets.SERVICE_ACCOUNT }}
 
+    # Option 1 - without action plugin
     # Build and push image artifact to Docker repository
-    - name: Build image
-      run: docker build -f ./Dockerfile . --tag ${{ env.GAR_URL }}/${{ env.APP_NAME }}:latest
-      working-directory: .
+    # - name: Build image
+    #   run: docker build -f ./Dockerfile . --tag ${{ env.GAR_URL }}/${{ env.APP_NAME }}:latest
+    #   working-directory: .
 
-    - name: Push image
-      run: |
-        gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
-        docker push ${{ env.GAR_URL }}/${{ env.APP_NAME }}:latest
+    # - name: Push image
+    #   run: |
+    #     gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
+    #     docker push ${{ env.GAR_URL }}/${{ env.APP_NAME }}:latest
+
+    # Option 2 - with Action plugin (QEMU)
+    # Build and Push Docker Image to Artifact Registry
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v2
+      
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+
+    - name: Build and Push Docker image
+      uses: docker/build-push-action@v4
+      with:
+        context: .
+        push: true
+        tags: ${{ env.APP_NAME }}:latest
+        cache-to: type=gha, mode=max
+        cache-from: type=gha
+    
 
   deploy-job: # Deploy resources job
     needs: build-image-job
