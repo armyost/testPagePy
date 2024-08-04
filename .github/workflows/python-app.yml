@@ -59,6 +59,12 @@ jobs:
         echo "Compiling the code..."  
         echo "Compile complete."
 
+    # SonarCloud
+    - name: SonarCloud Scan
+      uses: sonarsource/sonarcloud-github-action@v2.1.0
+      env:
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
     # UnitTest
     - name: Unit test
       run: |
