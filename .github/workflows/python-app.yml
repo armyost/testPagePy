@@ -60,6 +60,7 @@ jobs:
     - name: Build source codes
       run: |
         echo "Compiling the code..."  
+        poetry install
         echo "Compile complete."
 
     # SonarCloud
