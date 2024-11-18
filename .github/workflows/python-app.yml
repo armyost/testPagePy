@@ -44,9 +44,9 @@ jobs:
         ref: ${{env.BASE_BRANCH}}
     - name: Set up Python version
       uses: actions/setup-python@v4
-      cache: 'poetry'
       with:
         python-version: ${{env.PYTHON_VERSION}}
+        cache: 'poetry'
 
     # Before build : Initialize environment, install dependency, fetch libraries
     - name: Setup build environment
