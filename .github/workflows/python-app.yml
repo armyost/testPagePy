@@ -43,7 +43,8 @@ jobs:
       with:
         ref: ${{env.BASE_BRANCH}}
     - name: Set up Python version
-      uses: actions/setup-python@v3
+      uses: actions/setup-python@v4
+      cache: 'poetry'
       with:
         python-version: ${{env.PYTHON_VERSION}}
 
