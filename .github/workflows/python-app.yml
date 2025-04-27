@@ -46,7 +46,6 @@ env:
 jobs:
   source-code-build-job: # Build artifacts job
     runs-on: ubuntu-latest
-    # runs-on: self-hosted
     # Configuration and checkout
     steps:
     - uses: actions/checkout@v3
