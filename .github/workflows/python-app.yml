@@ -58,19 +58,19 @@ jobs:
 
     - name: Use the token
       env:
-        TEMP: "TEST"
+        GH_TOKEN: ${{ steps.generate-token.outputs.token }}
       run: |
-        echo $TEMP
+        echo $GH_TOKEN
         env
 
 
     - name: Check Point
       run: |
         touch sec.txt
-        echo $TEMP_SECRET >> sec.txt
+        echo $GH_TOKEN >> sec.txt
         cat sec.txt
       env:
-        TEMP_SECRET: ${{ env.GH_TOKEN }}
+        GH_TOKEN: ${{ steps.generate-token.outputs.token }}
 
   
     # Checkout Config Repo Repository and apply new image name
@@ -79,7 +79,7 @@ jobs:
       with:
           repository: armyost/testPage
           ref: main
-          token: ${{ env.GH_TOKEN }}
+          token: ${{ steps.generate-token.outputs.token }}
 
     # Git config setup
     - name: Git Config
