@@ -1,0 +1,237 @@
+# This workflow will install Python dependencies, run tests and lint with a single version of Python
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python
+
+name: Python application
+
+on:
+  workflow_dispatch:
+    inputs:
+      logLevel:
+        description: 'Log level'     
+        required: true
+        default: 'warning'
+      tags:
+        description: 'Test scenario tags'
+  # push:
+  #   branches: [ "master" ]
+  # pull_request:
+    # branches: [ "master" ]
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  BASE_BRANCH: "master"       # source code branch for pipeline
+  APP_NAME: "sample-app"      # image name, application name
+  K8S_NAMESPACE: "sample-ns"  # k8s-namespace
+  BUILD_PATH: "dist"          # directory for distributing artifacts
+  GAR_URL: "europe-west1-docker.pkg.dev/sample-prj-231220/sample-img-registry" # Image registry path
+  REGION: "europe-west1"      # GCP location
+  PYTHON_VERSION: "3.10"      # source code development kit version
+  MANIFEST_PATH: "manifest"   # manifests directory path
+  GKE_CLUSTER: "sample-cluster"
+  GKE_ZONE: "europe-west1"
+
+jobs:
+  source-code-build-job: # Build artifacts job
+    runs-on: ubuntu-latest
+    # runs-on: self-hosted
+    # Configuration and checkout
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        ref: ${{env.BASE_BRANCH}}
+
+        
+    - name: Install poetry
+      run: pipx install poetry
+    - name: Set up Python version
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{env.PYTHON_VERSION}}
+        cache: 'poetry'
+
+    # Before build : Initialize environment, install dependency, fetch libraries
+    - name: Setup build environment
+      run: |
+        echo "Setup build environment..."
+        echo "Complete setting build environment."
+
+    # Source code build
+    - name: Build source codes
+      run: |
+        echo "Compiling the code..."  
+        poetry install
+        echo "Compile complete."
+
+    # SonarCloud
+    - name: SonarCloud Scan
+      uses: sonarsource/sonarcloud-github-action@v2.1.0
+      env:
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+    # UnitTest
+    - name: Unit test
+      run: |
+        echo "Running unit tests... This will take about 60 seconds." 
+        echo "Unit tests complete."
+
+    # QualityGate
+    # - name: Quality Gate Check
+    #   uses: dieuhd/sonar-quality-gate@v1
+    #   env:
+    #     SONAR_URL: ${{ secrets.SONAR_URL }}
+    #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+    #     SONAR_PROJECT_KEY: ${{ secrets.SONAR_PROJECT_KEY }}
+    #   with:
+    #     login:  ${{ secrets.SONAR_TOKEN }}
+
+    # Move artifacts to directory for distribute
+    - name: Move Application Artifact for distribute
+      run: |
+        echo "Moving application artifacts..." 
+        rsync -a ./app ./${{ env.BUILD_PATH }}/
+        echo "Complete moving application artifacts." 
+    
+    - name: Move DockerFile for distribute
+      run: |
+        echo "Moving DockerFile..." 
+        rsync -a Dockerfile ./${{ env.BUILD_PATH }}/
+        echo "Complete moving DockerFile."
+
+    - name: Make and Move Manifests for distribute
+      run: |
+        echo "Making k8s templates..." 
+        sed -i -e 's,IMG_REGI,${{ env.GAR_URL }},g' manifest/deployment.yaml
+        sed -i -e 's,APP_NAME,${{ env.APP_NAME }},g' manifest/deployment.yaml
+        sed -i -e 's,APP_NAME,${{ env.APP_NAME }},g' manifest/service.yaml
+        sed -i -e 's,APP_NAME,${{ env.APP_NAME }},g' manifest/ingress.yaml
+        echo "Complete making k8s templates..."
+
+        echo "Moving k8s template artifacts..."
+        rsync -a ./app ./${{ env.BUILD_PATH }}/
+        echo "Complete moving k8s template artifacts..."
+
+    # Store artifacts
+    - name: Archive production artifacts
+      uses: actions/upload-artifact@v3
+      with:
+          name: dist-without-markdown
+          path: |
+            dist
+            !dist/**/*.md
+          retention-days: 5
+    
+    - name: Archive Manifests
+      uses: actions/upload-artifact@v3
+      with:
+          name: manifest-without-markdown
+          path: |
+            manifest
+            !manifest/**/*.md
+          retention-days: 5
+          
+
+  build-image-job: # Build container image job
+    needs: source-code-build-job
+    runs-on: ubuntu-latest
+    # runs-on: self-hosted
+
+    # DownLoad artifacts
+    steps:
+    - name: Download a application artifact
+      uses: actions/download-artifact@v3
+      with:
+        name: dist-without-markdown
+
+    - name: Show files downloaded
+      run: |
+        ls -a
+    
+    # GCP login
+    # - name: Set up GCP Credential
+    #   uses: 'google-github-actions/auth@v1'
+    #   with:
+    #     token_format: 'access_token'
+    #     workload_identity_provider: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER_ID }}
+    #     service_account: ${{ secrets.SERVICE_ACCOUNT }}
+
+    # # Option 1 - without action plugin
+    # # Build and push image artifact to Docker repository
+    # - name: Build image
+    #   run: | 
+    #     # docker build -f ./Dockerfile . --tag ${{ env.GAR_URL }}/${{ env.APP_NAME }}:latest
+    #     docker build -f ./Dockerfile . --tag armyost/${{ env.APP_NAME }}:v0.2
+    #   working-directory: .
+
+    # - name: Push image
+    #   run: |
+    #     docker login --username=${{ secrets.DOCKERHUB_USERNAME }} --password=${{ secrets.DOCKERHUB_TOKEN }}
+    #     docker push armyost/${{ env.APP_NAME }}:v0.2
+    #   #   gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
+    #   #   docker push ${{ env.GAR_URL }}/${{ env.APP_NAME }}:latest
+
+    # Option 2 - with Action plugin (QEMU)
+    # Build and Push Docker Image to Artifact Registry
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v2
+      
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+
+    # Docker Repository Login
+    - name: Login to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+        
+    - name: Build and Push Docker image
+      uses: docker/build-push-action@v4
+      with:
+        context: .
+        push: true
+        tags: armyost/${{ env.APP_NAME }}:latest
+        cache-to: type=gha, mode=max
+        cache-from: type=gha
+    
+
+  # deploy-job: # Deploy resources job
+  #   needs: build-image-job
+  #   runs-on: ubuntu-latest
+  #   # runs-on: self-hosted
+
+  #   # DownLoad artifacts
+  #   steps:
+  #   - name: Download manifests
+  #     uses: actions/download-artifact@v3
+  #     with:
+  #       name: manifest-without-markdown
+
+  #   - name: Show files downloaded
+  #     run: |
+  #       ls -a
+
+  #   # GCP login
+  #   - name: Set up GCP Credential
+  #     uses: 'google-github-actions/auth@v1'
+  #     with:
+  #       token_format: 'access_token'
+  #       workload_identity_provider: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER_ID }}
+  #       service_account: ${{ secrets.SERVICE_ACCOUNT }}  
+  
+  #   # Check kubeconfig setting for deploy
+  #   - name: Check Kubeconfig 
+  #     uses: google-github-actions/get-gke-credentials@db150f2cc60d1716e61922b832eae71d2a45938f
+  #     with:
+  #       cluster_name: ${{ env.GKE_CLUSTER }}
+  #       location: ${{ env.GKE_ZONE }}
+            
+  #   # Deploy manifests
+  #   - name: Deploy Manifests
+  #     run: |
+  #       kubectl apply -f deployment.yaml -n ${{ env.K8S_NAMESPACE }}
+  #       kubectl apply -f ingress.yaml -n ${{ env.K8S_NAMESPACE }}
+  #       kubectl apply -f service.yaml -n ${{ env.K8S_NAMESPACE }}
+  #       kubectl rollout status deployment ${{ env.APP_NAME }}-deploy -n ${{ env.K8S_NAMESPACE }}
