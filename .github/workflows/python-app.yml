@@ -80,6 +80,7 @@ jobs:
           repository: armyost/testPage
           ref: master
           token: ${{ steps.generate-token.outputs.token }}
+          persist-credentials: false
 
     # Git config setup
     - name: Git Config
