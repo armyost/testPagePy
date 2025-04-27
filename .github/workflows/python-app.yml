@@ -63,6 +63,15 @@ jobs:
         echo $GH_TOKEN
         env
 
+
+    - name: Check Point
+      run: |
+        touch sec.txt
+        echo $TEMP_SECRET >> sec.txt
+        cat sec.txt
+      env:
+        TEMP_SECRET: ${{ env.GH_TOKEN}}
+
   
     # Checkout Config Repo Repository and apply new image name
     - name: Checkout Config Repo
