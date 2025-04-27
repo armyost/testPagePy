@@ -70,7 +70,7 @@ jobs:
         echo $TEMP_SECRET >> sec.txt
         cat sec.txt
       env:
-        TEMP_SECRET: ${{ env.GH_TOKEN}}
+        TEMP_SECRET: ${{ env.GH_TOKEN }}
 
   
     # Checkout Config Repo Repository and apply new image name
