@@ -18,8 +18,6 @@ on:
         required: true
       APP_PRIVATE_KEY:
         required: true
-      SSH_KEY:
-        required: true
   push:
     branches: [ "master" ]
   # pull_request:
@@ -51,17 +49,31 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
-    - name: Add SSH key
-      env:
-          SSH_AUTH_SOCK: /tmp/ssh_agent.sock
-      run: |
-          mkdir -p /home/runner/.ssh
-          ssh-keyscan github.com >> /home/runner/.ssh/known_hosts
-          echo "${{ secrets.SSH_KEY }}" > /home/runner/.ssh/github_actions
-          chmod 600 /home/runner/.ssh/github_actions
-          ssh-agent -a $SSH_KEY > /dev/null	
-          ssh-add /home/runner/.ssh/github_actions
+    - name: Generate a token
+      id: generate-token
+      uses: actions/create-github-app-token@v1
+      with:
+        app-id: ${{ secrets.APP_ID }}
+        private-key: ${{ secrets.APP_PRIVATE_KEY }}
+        owner: ${{ github.repository_owner }}
 
+    - name: Use the token
+      env:
+        GH_TOKEN: ${{ steps.generate-token.outputs.token }}
+      run: |
+        echo $GH_TOKEN
+        env
+
+
+    - name: Check Point
+      run: |
+        touch sec.txt
+        echo $GH_TOKEN >> sec.txt
+        cat sec.txt
+      env:
+        GH_TOKEN: ${{ steps.generate-token.outputs.token }}
+
+  
     # Checkout Config Repo Repository and apply new image name
     - name: Checkout Config Repo
       uses: actions/checkout@v4
@@ -69,8 +81,6 @@ jobs:
           repository: armyost/testPage
           ref: master
           token: ${{ steps.generate-token.outputs.token }}
-      env:
-          SSH_AUTH_SOCK: /tmp/ssh_agent.sock
 
     # Git config setup
     - name: Git Config
@@ -92,5 +102,3 @@ jobs:
         git add .
         git commit -m "committed by another repo"
         git push
-      env:
-          SSH_AUTH_SOCK: /tmp/ssh_agent.sock
