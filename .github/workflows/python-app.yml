@@ -94,6 +94,7 @@ jobs:
     # Update image path
     - name: RELEASE Update the image
       run: |
+        ls -al
         touch TEST-README.md
 
     # Commit remote repo
