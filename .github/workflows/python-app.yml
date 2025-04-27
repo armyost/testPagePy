@@ -58,9 +58,9 @@ jobs:
 
     - name: Use the token
       env:
-        GH_TEMP: ${{ steps.generate-token.outputs.token }}
+        TEMP: ${{ steps.generate-token.outputs.token }}
       run: |
-        echo $GH_TEMP
+        echo $TEMP
         env
 
 
