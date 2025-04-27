@@ -58,7 +58,7 @@ jobs:
 
     - name: Use the token
       env:
-        TEMP: ${{ steps.generate-token.outputs.token }}
+        TEMP: "TEST"
       run: |
         echo $TEMP
         env
