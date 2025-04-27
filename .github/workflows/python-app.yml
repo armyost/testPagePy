@@ -67,7 +67,6 @@ jobs:
       with:
           repository: armyost/testPage
           ref: master
-          token: ${{ steps.generate-token.outputs.token }}
       env:
           SSH_AUTH_SOCK: /tmp/ssh_agent.sock
 
