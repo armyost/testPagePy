@@ -65,7 +65,7 @@ jobs:
     - name: Checkout Config Repo
       uses: actions/checkout@v4
       with:
-          repository: armyost/testPage
+          repository: armyost/CrawlingArticle
           ssh-key: ${{ secrets.SSH_KEY }}
           ref: master
 
